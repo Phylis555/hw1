@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/purple_lite_200"
+    tools:context=".Model.MainActivity">
+
+
+
+        <TextView
+            android:id="@+id/gameTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:textSize="@android:dimen/app_icon_size"
+            android:layout_marginTop="30dp"
+            android:text="Spaceship Game" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/play_btn"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:text="Play" />
+
+
+    <LinearLayout
+        android:id="@+id/main_LAYOUT_toggles1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/main_LAYOUT_toggles2"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp">
+
+
+        <TextView
+            android:id="@+id/speed_opt_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_weight="1"
+
+            android:text="Choose the Speed:"
+            android:textSize="20dp" />
+
+        <View
+            android:layout_width="16dp"
+            android:layout_height="0dp" />
+        <ToggleButton
+            android:id="@+id/toggleSpeed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ToggleButton" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/main_LAYOUT_toggles2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="32dp">
+
+        <TextView
+            android:id="@+id/my_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose the Sensor:"
+            android:textSize="20dp"
+            android:layout_weight="1" />
+        <View
+            android:layout_width="16dp"
+            android:layout_height="0dp" />
+        <ToggleButton
+            android:id="@+id/toggleSensor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ToggleButton" />
+
+    </LinearLayout>
+
+
+
+
+
+</RelativeLayout>
