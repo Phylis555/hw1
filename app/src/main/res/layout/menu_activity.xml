@@ -27,7 +27,24 @@
             android:layout_centerHorizontal="true"
             android:text="Play" />
 
+    <LinearLayout
+        android:id="@+id/main_LAYOUT_score_table"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/main_LAYOUT_toggles1"
+        android:layout_below="@+id/play_btn"
+        android:layout_centerInParent="true"
 
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="60dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/score_btn"
+            android:layout_width="121dp"
+            android:layout_height="wrap_content"
+            android:text="Score Table" />
+
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/main_LAYOUT_toggles1"
         android:layout_width="match_parent"
@@ -85,8 +102,6 @@
             android:text="ToggleButton" />
 
     </LinearLayout>
-
-
 
 
 

@@ -1,21 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.MapFragment"
-    android:background="@color/purple_500"
-    >
+    android:id="@+id/map"
+    tools:context="Fragments.MapFragment"
+    android:name="com.google.android.gms.maps.SupportMapFragment" />
 
-    <TextView
-        android:id="@+id/map_LBL_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Map"
-        android:textSize="40sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        />
 
-</RelativeLayout>

@@ -14,7 +14,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:padding="20dp"
-        android:background="@color/teal_700"
+        android:background="@color/grey_lite"
         />
 
     <FrameLayout
@@ -23,7 +23,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:padding="20dp"
-        android:background="@color/purple_200"
+        android:background="@color/purple_lite_200"
         />
 
 

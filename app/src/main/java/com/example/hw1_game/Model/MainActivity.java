@@ -1,26 +1,32 @@
 package com.example.hw1_game.Model;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.util.Random;
 
 import com.bumptech.glide.Glide;
+import com.example.hw1_game.Interfaces.StepCallback;
 import com.example.hw1_game.Logic.GameManager;
 import com.example.hw1_game.R;
 import com.example.hw1_game.Utilities.SignalGenerator;
+import com.example.hw1_game.Utilities.StepDetector;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textview.MaterialTextView;
@@ -36,58 +42,47 @@ public class MainActivity extends AppCompatActivity {
     private ExtendedFloatingActionButton lButton;
     private ExtendedFloatingActionButton rButton;
 
+    private LocationManager locationManager;
+
+    private Location location;
+    private double latitude, longitude;
+
+    public static final String KEY_DELAY = "KEY_DELAY";
+
     public int DELAY = 1000;
+    public static final String KEY_SENSOR = "KEY_SENSOR";
+    public boolean sensorFlag = false;
+    public boolean gameOverFlag = false;
+
     public final int ROW_BOARD = 6;
     public final int COL_BOARD = 5;
-
     private int currentPosition = 2;
     private int heartIndex = 3;
-
     private GameManager gm;
+    private StepDetector stepDetector;
 
     private final Handler handler = new Handler();
 
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            //checkCollision();
             refreshUI();
             alienDownwards();
-            handler.postDelayed(this, DELAY); //Do it again in a second
             generateRow();
+            handler.postDelayed(this, DELAY); //Do it again in a second
         }
     };
 
-//    private void checkCollision() {
-//        int carPos;
-//        for (int i = 0; i < COL_BOARD; i++) {
-//            carPos = getSpaceshipPos();
-//            if (alienMat[ROW_BOARD - 1][i].getVisibility() == View.VISIBLE && carPos == i) {
-//                if (heartIndex != 0)        // for endless game
-//                {
-//                    main_IMG_hearts[heartIndex - 1].setVisibility(View.INVISIBLE);
-//                    heartIndex--;
-//                }
-//                SignalGenerator.getInstance().vibrate();
-//                SignalGenerator.getInstance().toast("You crashed the alien ",Toast.LENGTH_LONG);
-//               // Toast.makeText(MainActivity.this, "You crashed the alien ", Toast.LENGTH_LONG).show();
-//
-//            }
-//            alienMat[ROW_BOARD - 1][i].setVisibility(View.INVISIBLE);
-//        }
-//    }
 
     private int checkCollision() {
-        int hit =0;
-        //int carPos;
+        int hit = 0;
         for (int i = 0; i < COL_BOARD; i++) {
-          //  carPos = getSpaceshipPos();
-            if (alienMat[ROW_BOARD - 1][i].getVisibility() == View.VISIBLE && currentPosition == i ) {
-                hit =1;
+            if (alienMat[ROW_BOARD - 1][i].getVisibility() == View.VISIBLE && currentPosition == i) {
+                hit = 1;
 
             }
-            if (powerMat[ROW_BOARD - 1][i].getVisibility() == View.VISIBLE && currentPosition == i ) {
-                hit =2;
+            if (powerMat[ROW_BOARD - 1][i].getVisibility() == View.VISIBLE && currentPosition == i) {
+                hit = 2;
 
             }
 
@@ -101,70 +96,75 @@ public class MainActivity extends AppCompatActivity {
     private void refreshUI() {
         int state = checkCollision();
 
-        if (gm.isLose()) {
-            openScoreScreen("Game Over", gm.getScore());
+        if (gm.isLose() && !gameOverFlag) {
+            gm.gameEnded(longitude,latitude);
+           gameOverFlag=true;
+            openScoreScreen();
+
         }
-        gm.updateCollision(this, state);
-         if (gm.getHit() > 0 && state == 1 && gm.getHit() <= 3) // change to gm.getHit() != 0
-            {
-                main_IMG_hearts[main_IMG_hearts.length - gm.getHit()].setVisibility(View.INVISIBLE);
-            }
-        else {
-            main_LBL_score.setText(""+ gm.getScore());
+        if(!gameOverFlag)
+                gm.updateCollision(this, state);
+        if (gm.getHit() > 0 && state == 1 && gm.getHit() <= 3) // change to gm.getHit() != 0
+        {
+            main_IMG_hearts[main_IMG_hearts.length - gm.getHit()].setVisibility(View.INVISIBLE);
+        } else {
+            main_LBL_score.setText("" + gm.getScore());
         }
     }
 
-    private void openScoreScreen(String status, int score) {
+    private void openScoreScreen() {
         Intent scoreIntent = new Intent(MainActivity.this, ScoreActivity.class);
-        scoreIntent.putExtra(ScoreActivity.KEY_SCORE, score);
-    //    scoreIntent.putExtra(ScoreActivity.KEY_STATUS, status);
-        startActivity(scoreIntent);///////////// start from here
+        startActivity(scoreIntent);
         finish();
     }
 
 
-
-
-
-
-    private void alienDownwards(){
-        for(int i = ROW_BOARD-1; i>=0; i--)
-        {
-            for(int j=0; j<COL_BOARD; j++)
-            {
-                if(alienMat[i][j].getVisibility() == View.VISIBLE)
-                {
+    private void alienDownwards() {
+        for (int i = ROW_BOARD - 1; i >= 0; i--) {
+            for (int j = 0; j < COL_BOARD; j++) {
+                if (alienMat[i][j].getVisibility() == View.VISIBLE) {
                     alienMat[i][j].setVisibility(View.INVISIBLE);
-                    alienMat[i+1][j].setVisibility(View.VISIBLE);
-
+                    alienMat[i + 1][j].setVisibility(View.VISIBLE);
                 }
-                if(powerMat[i][j].getVisibility() == View.VISIBLE)
-                {
+                if (powerMat[i][j].getVisibility() == View.VISIBLE) {
                     powerMat[i][j].setVisibility(View.INVISIBLE);
-                    powerMat[i+1][j].setVisibility(View.VISIBLE);
-
+                    powerMat[i + 1][j].setVisibility(View.VISIBLE);
                 }
             }
         }
     }
 
-
-
-
-
-    private void generateRow()
-    {
+    private void generateRow() {
         Random r = new Random();
         int rNum1 = r.nextInt(COL_BOARD);
-        int rNum2 =  r.nextInt(COL_BOARD);
-        if(rNum1 == rNum2)
+        int rNum2 = r.nextInt(COL_BOARD);
+        if (rNum1 == rNum2)
             powerMat[0][rNum2].setVisibility(View.VISIBLE);
         else
             alienMat[0][rNum1].setVisibility(View.VISIBLE);
-
     }
 
+    private void initStepDetector() {
 
+        if (sensorFlag) {
+            stepDetector = new StepDetector(this, new StepCallback() {
+                @Override
+                public void stepX() {
+
+                    if (currentPosition != COL_BOARD - 1 || currentPosition != 0) {
+                        spaceship[stepDetector.getStepsX()].setVisibility(View.VISIBLE);
+                        spaceship[currentPosition].setVisibility(View.INVISIBLE);
+                        currentPosition = stepDetector.getStepsX();
+                    }
+                }
+
+            });
+
+            rButton.setVisibility(View.INVISIBLE);
+            lButton.setVisibility(View.INVISIBLE);
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +175,23 @@ public class MainActivity extends AppCompatActivity {
         SignalGenerator.init(this);
 
         gm = new GameManager(main_IMG_hearts.length);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+        ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},1);
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10, 1, new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+            }
+        });
+
+
+
         Glide
                 .with(this)
                 .load("https://cdn.wallpapersafari.com/37/18/VDax80.jpg")
@@ -188,10 +205,40 @@ public class MainActivity extends AppCompatActivity {
         lButton.setOnClickListener(view -> moveSpaceshipLeft());
         Intent intentSpeed = getIntent();
         if (intentSpeed != null) {
-           DELAY = intentSpeed.getIntExtra("DELAY", 1000);
+           DELAY = intentSpeed.getIntExtra(MainActivity.KEY_DELAY, 1000);
         }
+
+        Intent intentSensor = getIntent();
+        if (intentSensor != null) {
+            sensorFlag = intentSpeed.getBooleanExtra(MainActivity.KEY_SENSOR,false);
+        }
+
+        initStepDetector();
         handler.postDelayed(runnable,DELAY);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(sensorFlag)
+            stepDetector.start();
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(sensorFlag)
+            stepDetector.stop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacks(runnable);
     }
     private void startView()
     {
@@ -202,7 +249,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void moveSpaceshipRight() {
-       // currentPosition = getSpaceshipPos();
       if(currentPosition != COL_BOARD-1) {
           spaceship[currentPosition + 1].setVisibility(View.VISIBLE);
           spaceship[currentPosition].setVisibility(View.INVISIBLE);
@@ -212,30 +258,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void moveSpaceshipLeft() {
 
-        //currentPosition = getSpaceshipPos();
         if(currentPosition !=0) {
             spaceship[currentPosition - 1].setVisibility(View.VISIBLE);
             spaceship[currentPosition].setVisibility(View.INVISIBLE);
             currentPosition--;
         }
     }
-    private int getSpaceshipPos()
-    {
-        for(int i =0; i< spaceship.length; i++) {
-            if(spaceship[i].getVisibility() == View.VISIBLE)
-               return i;
-        }
-        return -1;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacks(runnable);
-    }
-
-
-
 
     private void findViews() {
         main_IMG_background = findViewById(R.id.main_IMG_background);
