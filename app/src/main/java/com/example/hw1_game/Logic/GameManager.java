@@ -24,7 +24,7 @@ public class GameManager
     private int hit;
     private final int DISTANCE_SCORE = 10;
     private final int BOOST_SCORE = 100;
-    private final int TOP_TEN = 3;
+    private final int TOP_TEN = 10;
     private ScoreList scoreList;
     public static final String SCORE_OBJ= "score_obj";
     public GameManager(int life) {

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,7 +58,7 @@ public class ListFragment extends Fragment implements RecyclerViewInterface {
         main_LST_scores.setAdapter(scoreAdapter);
     }
 
-    private void findViews(View view) {
+    private void findViews(@NonNull View view) {
         score_IMG_marker = view.findViewById(R.id.score_IMG_marker);
         main_LST_scores = view.findViewById(R.id.main_LST_scores);
     }

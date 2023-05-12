@@ -51,12 +51,12 @@ public class StepDetector {
     private void calculateStep(float x) {
         if (System.currentTimeMillis() - timestamp > 500) {
             timestamp = System.currentTimeMillis();
-            if (x > 4.1 && stepCounterX !=0) {
+            if (x > 3.8 && stepCounterX !=0) {
                 stepCounterX--;
                 if (stepCallback != null)
                     stepCallback.stepX();
             }
-            if (x < -4.1 && stepCounterX !=4)  {
+            if (x < -3.8 && stepCounterX !=4)  {
                 stepCounterX++;
                 if (stepCallback != null)
                     stepCallback.stepX();
